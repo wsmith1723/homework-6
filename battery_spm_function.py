@@ -44,15 +44,15 @@ def residual(t, SV, pars, ptr, flags):
     CALCULATE TERMS FOR VOLUMETRIC THERMAL ENERGY PRODUCTION (W/m3)
     """
     # Conduction heat transfer from the anode to the electrolyte separator:
-    Q_cond_an = 0
+    Q_cond_an = -lambda_an*dyInv_an*(SV[ptr.T_an] - SV[ptr.T_elyte])
 
     # Volumetric heat source/sink terms: (W/m3)
-    Q_rxn = 0
-    Q_ohm_el = 0
-    Q_ohm_io = 0
-    Q_cond = 0
-    Q_rad = 0
-    Q_conv = 0
+    Q_rxn = -np.dot(sdot_k, energy_k)
+    Q_ohm_el = pars.i_ext**2*pars.R_el_an
+    Q_ohm_io = pars.i_ext**2*pars.R_io_an
+    Q_cond = Q_cond_an*dyInv_an
+    Q_rad = sigma*pars.emmissivity*(pars.T_amb**4 - SV[ptr.T_an]**4)*pars.A_ext
+    Q_conv = pars.h_conv*(pars.T_amb - SV[ptr.T_an])*pars.A_ext
     """
     END CODING
     """
@@ -76,15 +76,15 @@ def residual(t, SV, pars, ptr, flags):
     CALCULATE TERMS FOR VOLUMETRIC THERMAL ENERGY PRODUCTION (W/m3)
     """
     # Conduction heat transfer from the electrolyte separator to the cathode:
-    Q_cond_ca = 0
+    Q_cond_ca = -lambda_ca*dyInv_ca*(SV[ptr.T_elyte] - SV[ptr.T_ca])
 
     # Volumetric heat source/sink terms: (W/m3)
     Q_rxn = 0
     Q_ohm_el = 0
-    Q_ohm_io = 0
-    Q_cond = 0
-    Q_rad = 0
-    Q_conv = 0
+    Q_ohm_io = pars.i_ext**2*pars.R_io_elyte
+    Q_cond = Q_cond_ca*dyInv_ca - Q_cond_an*dyInv_an
+    Q_rad = sigma*pars.emmissivity*(pars.T_amb**4 - SV[ptr.T_elyte]**4)*pars.A_ext
+    Q_conv = pars.h_conv*(pars.T_amb - SV[ptr.T_elyte])*pars.A_ext
     """
     END CODING
     """
@@ -119,12 +119,12 @@ def residual(t, SV, pars, ptr, flags):
     
     CALCULATE TERMS FOR VOLUMETRIC THERMAL ENERGY PRODUCTION (W/m3)
     """
-    Q_rxn = 0
-    Q_ohm_el = 0
-    Q_ohm_io = 0
-    Q_cond = 0
-    Q_rad = 0
-    Q_conv = 0
+    Q_rxn = -np.dot(sdot_k, energy_k)
+    Q_ohm_el = pars.i_ext**2*pars.R_el_ca
+    Q_ohm_io = pars.i_ext**2*pars.R_io_ca
+    Q_cond = -Q_cond_ca*dyInv_ca
+    Q_rad = sigma*pars.emmissivity*(pars.T_amb**4 - SV[ptr.T_ca]**4)*pars.A_ext
+    Q_conv = pars.h_conv*(pars.T_amb - SV[ptr.T_ca])*pars.A_ext
     """
     END CODING
     """
